@@ -21,11 +21,14 @@ if 'level' not in st.session_state:
     st.session_state.level = 1
 if 'points' not in st.session_state:
     st.session_state.points = 0
+if 'hints_used' not in st.session_state:
+    st.session_state.hints_used = 0
 
-# Display current level and points
+# Display current level, points, and hints used
 st.sidebar.title("Your Progress")
 st.sidebar.write(f"Level: {st.session_state.level}")
 st.sidebar.write(f"Points: {st.session_state.points}")
+st.sidebar.write(f"Hints Used: {st.session_state.hints_used}")
 
 # Code input area
 st.write("Enter your Python code using pandas below and see the result in real-time.")
@@ -49,46 +52,58 @@ if st.button("Run Code"):
     else:
         st.warning("Please enter some code to run.")
 
+# Hint system
+def get_hint(level):
+    hints = {
+        1: "Remember to import pandas as pd to use the library.",
+        2: "Use pd.read_csv() to import data from a CSV file.",
+        # Add more hints for each level
+    }
+    return hints.get(level, "No hint for this level.")
+
+if st.sidebar.button("Get a Hint"):
+    hint = get_hint(st.session_state.level)
+    st.sidebar.write(hint)
+    st.session_state.hints_used += 1
+    st.session_state.points -= 1  # Deduct points for using a hint
+
+# Dataset import challenge
+def load_random_dataset():
+    datasets = {
+        1: ('Iris Dataset', 'https://raw.githubusercontent.com/mwaskom/seaborn-data/master/iris.csv'),
+        2: ('Boston Housing Dataset', 'https://raw.githubusercontent.com/selva86/datasets/master/BostonHousing.csv'),
+        # Add more datasets with increasing complexity
+    }
+    level_dataset = datasets.get(st.session_state.level)
+    if level_dataset:
+        st.sidebar.write(f"Dataset for Level {st.session_state.level}: {level_dataset[0]}")
+        return level_dataset[1]
+    else:
+        return None
+
+dataset_url = load_random_dataset()
+if dataset_url:
+    st.sidebar.write("Use the URL below to import the dataset with pandas:")
+    st.sidebar.write(dataset_url)
+
 # Example code snippets to help users
 st.sidebar.title("Examples")
 example1 = '''
 import pandas as pd
 
-# Create a sample DataFrame
-data = {'Name': ['Alice', 'Bob', 'Charlie'],
-        'Age': [25, 30, 35],
-        'City': ['New York', 'San Francisco', 'Los Angeles']}
-df = pd.DataFrame(data)
+# Importing a dataset from a URL
+url = "https://raw.githubusercontent.com/mwaskom/seaborn-data/master/iris.csv"
+df = pd.read_csv(url)
 
 # Display the DataFrame
 output.write(df)
 '''
 
-st.sidebar.subheader("Example 1: Create and Display DataFrame")
+st.sidebar.subheader("Example 1: Import and Display Dataset")
 st.sidebar.code(example1, language='python')
 
 if st.sidebar.button("Load Example 1"):
     user_code = example1
-    st.text_area("Your Code", value=user_code, height=200)
-
-example2 = '''
-import pandas as pd
-
-# Create a sample DataFrame
-data = {'Name': ['Alice', 'Bob', 'Charlie'],
-        'Age': [25, 30, 35],
-        'City': ['New York', 'San Francisco', 'Los Angeles']}
-df = pd.DataFrame(data)
-
-# Display basic statistics
-output.write(df.describe())
-'''
-
-st.sidebar.subheader("Example 2: DataFrame Statistics")
-st.sidebar.code(example2, language='python')
-
-if st.sidebar.button("Load Example 2"):
-    user_code = example2
     st.text_area("Your Code", value=user_code, height=200)
 
 # Note: Users need to use `output.write` to display results in the app
