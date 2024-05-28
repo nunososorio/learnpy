@@ -2,6 +2,29 @@ import streamlit as st
 import pandas as pd
 import io
 
+# Function to display the game instructions
+def show_instructions():
+    st.sidebar.title("How to Play")
+    st.sidebar.info(
+        """
+        Welcome to the Python and Pandas Live Code Playground! Here's how you can learn and earn points:
+        
+        1. **Write Code**: In the code area, type your Python code using pandas to solve the given tasks.
+        2. **Run Code**: Press the 'Run Code' button to execute your code and see the output.
+        3. **Earn Points**: Complete tasks correctly to earn points and progress through levels.
+        4. **Use Hints**: Stuck? Use the 'Get a Hint' button for help, but beware, it costs points!
+        5. **Learn**: Check the 'Examples' section for code snippets that can help you learn pandas functions.
+        6. **Import Data**: Use the provided dataset URLs to practice importing and analyzing data.
+        7. **Have Fun**: Enjoy the process of learning and challenge yourself to improve!
+        
+        Ready to start coding? Enter your code in the text area and hit 'Run Code' to begin!
+        """
+    )
+
+# Call the function to display the instructions
+show_instructions()
+
+
 # Function to execute the user's code
 def execute_user_code(code):
     try:
