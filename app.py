@@ -4,42 +4,51 @@ import io
 
 # Function to display the game instructions
 def show_instructions():
-    st.sidebar.title("How to Play")
-    st.sidebar.info(
+    st.title("Welcome to the Pandas Playground!")
+    st.info(
         """
-        Welcome to the Python and Pandas Live Code Playground! Here's how you can learn and earn points:
-        
-        1. **Write Code**: In the code area, type your Python code using pandas to solve the given tasks.
-        2. **Run Code**: Press the 'Run Code' button to execute your code and see the output.
-        3. **Earn Points**: Complete tasks correctly to earn points and progress through levels.
-        4. **Use Hints**: Stuck? Use the 'Get a Hint' button for help, but beware, it costs points!
-        5. **Learn**: Check the 'Examples' section for code snippets that can help you learn pandas functions.
-        6. **Import Data**: Use the provided dataset URLs to practice importing and analyzing data.
-        7. **Have Fun**: Enjoy the process of learning and challenge yourself to improve!
-        
-        Ready to start coding? Enter your code in the text area and hit 'Run Code' to begin!
+        This is a live code environment where you can learn pandas and earn points by solving tasks.
+        - **Write Code**: Type your Python code using pandas in the code box.
+        - **Run Code**: Click 'Run Code' to execute and see the output.
+        - **Earn Points**: Solve tasks correctly to earn points.
+        - **Use Hints**: Need help? Click 'Get a Hint' (costs points).
+        - **Learn**: Check 'Examples' for helpful code snippets.
+        - **Import Data**: Practice with datasets provided.
+        - **Have Fun**: Enjoy learning and challenge yourself!
         """
     )
 
-# Call the function to display the instructions
-show_instructions()
-
-
-# Function to execute the user's code
-def execute_user_code(code):
+# Function to safely execute user's code and check task completion
+def execute_user_code(code, task_id):
+    # Define expected outputs for each task
+    expected_outputs = {
+        1: "Expected output for task 1",
+        # Define more expected outputs for additional tasks
+    }
+    
     try:
-        # Redirect stdout to capture print statements
-        buffer = io.StringIO()
-        exec(code, {'pd': pd, 'output': buffer})
-        result = buffer.getvalue()
+        # Safe environment setup
+        safe_globals = {"pd": pd}
+        safe_locals = {"output": io.StringIO()}
+        
+        # Execute user code
+        exec(code, safe_globals, safe_locals)
+        result = safe_locals["output"].getvalue()
+        
+        # Validate task completion
+        if result.strip() == expected_outputs.get(task_id, ""):
+            st.session_state.points += 10
+            st.success("Great job! You've earned 10 points.")
+            st.balloons()
+            st.session_state.level += 1
+        else:
+            st.error("Try again, the output isn't quite right.")
+        return result
     except Exception as e:
-        result = str(e)
-    return result
+        st.error(f"An error occurred: {e}")
+        return ""
 
-# Streamlit App
-st.title("Python and Pandas Live Code Playground")
-
-# Progress tracking
+# Initialize session state variables
 if 'level' not in st.session_state:
     st.session_state.level = 1
 if 'points' not in st.session_state:
@@ -47,39 +56,29 @@ if 'points' not in st.session_state:
 if 'hints_used' not in st.session_state:
     st.session_state.hints_used = 0
 
-# Display current level, points, and hints used
+# Display instructions and progress
+show_instructions()
 st.sidebar.title("Your Progress")
 st.sidebar.write(f"Level: {st.session_state.level}")
 st.sidebar.write(f"Points: {st.session_state.points}")
 st.sidebar.write(f"Hints Used: {st.session_state.hints_used}")
 
-# Code input area
-st.write("Enter your Python code using pandas below and see the result in real-time.")
+# User code input area
 user_code = st.text_area("Your Code", height=200)
 
-# Execute the code when the button is pressed
+# Run code button
 if st.button("Run Code"):
     if user_code:
-        output = execute_user_code(user_code)
+        output = execute_user_code(user_code, st.session_state.level)
         st.subheader("Output")
         st.text(output)
-
-        # Check if the user has successfully completed the task
-        if 'import pandas as pd' in user_code:
-            st.session_state.points += 10
-            st.success("Task completed! You've earned 10 points.")
-            st.balloons()
-
-            # Progress to the next level
-            st.session_state.level += 1
     else:
         st.warning("Please enter some code to run.")
 
 # Hint system
 def get_hint(level):
     hints = {
-        1: "Remember to import pandas as pd to use the library.",
-        2: "Use pd.read_csv() to import data from a CSV file.",
+        1: "Use pd.read_csv() to read a CSV file into a DataFrame.",
         # Add more hints for each level
     }
     return hints.get(level, "No hint for this level.")
@@ -94,22 +93,17 @@ if st.sidebar.button("Get a Hint"):
 def load_random_dataset():
     datasets = {
         1: ('Iris Dataset', 'https://raw.githubusercontent.com/mwaskom/seaborn-data/master/iris.csv'),
-        2: ('Boston Housing Dataset', 'https://raw.githubusercontent.com/selva86/datasets/master/BostonHousing.csv'),
         # Add more datasets with increasing complexity
     }
-    level_dataset = datasets.get(st.session_state.level)
-    if level_dataset:
-        st.sidebar.write(f"Dataset for Level {st.session_state.level}: {level_dataset[0]}")
-        return level_dataset[1]
-    else:
-        return None
+    return datasets.get(st.session_state.level, (None, None))
 
-dataset_url = load_random_dataset()
-if dataset_url:
-    st.sidebar.write("Use the URL below to import the dataset with pandas:")
-    st.sidebar.write(dataset_url)
+dataset_info = load_random_dataset()
+if dataset_info[0]:
+    st.sidebar.write(f"Dataset for Level {st.session_state.level}: {dataset_info[0]}")
+    st.sidebar.write("Use the URL below to import the dataset:")
+    st.sidebar.write(dataset_info[1])
 
-# Example code snippets to help users
+# Example code snippets
 st.sidebar.title("Examples")
 example1 = '''
 import pandas as pd
@@ -119,14 +113,11 @@ url = "https://raw.githubusercontent.com/mwaskom/seaborn-data/master/iris.csv"
 df = pd.read_csv(url)
 
 # Display the DataFrame
-output.write(df)
+print(df.head())
 '''
 
 st.sidebar.subheader("Example 1: Import and Display Dataset")
 st.sidebar.code(example1, language='python')
 
 if st.sidebar.button("Load Example 1"):
-    user_code = example1
-    st.text_area("Your Code", value=user_code, height=200)
-
-# Note: Users need to use `output.write` to display results in the app
+    st.text_area("Your Code", value=example1, height=200)
