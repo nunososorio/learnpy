@@ -62,3 +62,6 @@ hints = {
     },
     # Add more hints for each level
 }
+
+def get_hint(level, hint_number):
+    return hints.get(level, {}).get(hint_number, "Hint not found.")
