@@ -181,9 +181,7 @@ def execute_user_code(code, task_id):
         else:
             st.error("This task is not yet implemented for validation.")
         return safe_locals
-    Apologies for the interruption. Here's the continuation of the code:
-
-st.error(f"An error occurred: {e}")
+    st.error(f"An error occurred: {e}")
         return ""
 
 # Initialize session state variables
