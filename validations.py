@@ -1,4 +1,4 @@
-def get_validation(code, task_id):
+def get_validation(code, task_id, pd):
     safe_globals = {"pd": pd}
     safe_locals = {}
     exec(code, safe_globals, safe_locals)
