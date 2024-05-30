@@ -5,7 +5,7 @@ def get_task(level):
         3: "Display the data types of each column using .dtypes.",
         4: "Drop a column from the DataFrame using .drop().",
         5: "Calculate summary statistics using .describe().",
-        6: "Filter the DataFrame based on a condition using boolean indexing.",
+        6: "Filter the DataFrame to include only ‘species’ equal to ‘setosa’.",
         7: "Group the data and calculate aggregates using .groupby().",
         8: "Merge two DataFrames using .merge().",
         9: "Pivot the data using .pivot_table().",
