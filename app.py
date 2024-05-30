@@ -5,10 +5,13 @@ import tasks
 import validations
 import hints
 
+# Create a placeholder for the instructions
+instructions_placeholder = st.empty()
+
 def show_instructions_and_task(level):
-    st.title("Pandas Playground: Learn and Code!")
-    st.info(
+    instructions_placeholder.markdown(
         f"""
+        # Pandas Playground: Learn and Code!
         Welcome to the Pandas Playground! Improve your pandas skills by completing tasks and earning points.
         Current Level: **{level}**
         Current Score: **{st.session_state.points}**
@@ -17,7 +20,7 @@ def show_instructions_and_task(level):
     
     # Display the task for the current level
     task = tasks.get_task(level)
-    st.write(f"**Level {level} Task**: {task}")
+    instructions_placeholder.markdown(f"**Level {level} Task**: {task}")
 
 def execute_user_code(code, task_id):
     try:
@@ -69,7 +72,6 @@ if st.button("Run Code"):
 # Progress to next task button
 if st.button("Next Task"):
     st.session_state.level += 1
-    st.empty()  # Clear the Streamlit cache
     show_instructions_and_task(st.session_state.level)
 
 # Display hints based on user requests
