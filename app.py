@@ -30,8 +30,15 @@ def execute_user_code(code, task_id):
         safe_globals = {"pd": pd}
         safe_locals = {}
         
-        # Execute user code
-        exec(code, safe_globals, safe_locals)
+        # Split the user's code into lines
+        code_lines = code.split('\n')
+        
+        # Execute all but the last line of the user's code
+        for line in code_lines[:-1]:
+            exec(line, safe_globals, safe_locals)
+        
+        # Evaluate the last line of the user's code and store the result
+        result = eval(code_lines[-1], safe_globals, safe_locals)
         
         # Run the validation check for the current task
         message, success = validations.get_validation(code, task_id, pd)
@@ -46,8 +53,8 @@ def execute_user_code(code, task_id):
         else:
             st.error(message)
             
-        # Return the DataFrame instead of a string
-        return safe_locals.get('df', pd.DataFrame())
+        # Return the result of the last expression evaluated in the user's code
+        return result
     except Exception as e:
         st.error(f"An error occurred: {e}")
         return pd.DataFrame()
