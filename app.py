@@ -51,9 +51,6 @@ if 'points' not in st.session_state:
 if 'hints_used' not in st.session_state:
     st.session_state.hints_used = 0
 
-# Display instructions and the task for the current level
-show_instructions_and_task(st.session_state.level)
-
 # User code input area
 user_code = st.text_area("Your Code", height=200)
 
