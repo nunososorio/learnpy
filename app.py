@@ -2,7 +2,6 @@ import streamlit as st
 import pandas as pd
 import io
 
-# Function to display the game instructions and the task for the current level
 def show_instructions_and_task(level):
     st.title("Pandas Playground: Learn and Code!")
     st.info(
@@ -13,7 +12,7 @@ def show_instructions_and_task(level):
     
     # Define tasks for each level
     tasks = {
-        1: "Import a CSV file into a DataFrame using pd.read_csv().",
+        1: 'Import the CSV "https://raw.githubusercontent.com/mwaskom/seaborn-data/master/iris.csv" file into a DataFrame using pd.read_csv().',
         2: "Display the first 5 rows of the DataFrame using .head().",
         3: "Display the data types of each column using .dtypes.",
         4: "Drop a column from the DataFrame using .drop().",
@@ -30,41 +29,158 @@ def show_instructions_and_task(level):
     task = tasks.get(level, "No task for this level.")
     st.write(f"**Level {level} Task**: {task}")
 
-# Function to safely execute user's code and check task completion
 def execute_user_code(code, task_id):
-    # Define expected outputs for each task
-    expected_outputs = {
-        1: "DataFrame loaded from CSV",
-        2: "First 5 rows of DataFrame",
-        3: "Data types of each column",
-        4: "DataFrame with a column dropped",
-        5: "Summary statistics of DataFrame",
-        6: "Filtered DataFrame",
-        7: "Aggregated data using groupby",
-        8: "Merged DataFrame",
-        9: "Pivoted DataFrame",
-        10: "DataFrame saved to CSV",
-        # Define more expected outputs for additional tasks
-    }
-    
     try:
         # Safe environment setup
         safe_globals = {"pd": pd}
-        safe_locals = {"output": io.StringIO()}
+        safe_locals = {}
         
         # Execute user code
         exec(code, safe_globals, safe_locals)
-        result = safe_locals["output"].getvalue()
         
-        # Validate task completion
-        if result.strip() == expected_outputs.get(task_id, ""):
-            st.session_state.points += 10
-            st.success("Great job! You've earned 10 points.")
-            st.balloons()
-            st.session_state.level += 1
+        if task_id == 1:
+            if "df" in safe_locals and isinstance(safe_locals["df"], pd.DataFrame):
+                st.session_state.points += 10
+                st.success("Great job! You've earned 10 points.")
+                st.balloons()
+                st.session_state.level += 1
+            else:
+                st.error("The DataFrame is not correctly loaded.")
+                
+        elif task_id == 2:
+            if "df" in safe_locals and hasattr(safe_locals["df"], 'head'):
+                result = safe_locals["df"].head()
+                expected = pd.read_csv("https://raw.githubusercontent.com/mwaskom/seaborn-data/master/iris.csv").head()
+                if result.equals(expected):
+                    st.session_state.points += 10
+                    st.success("Great job! You've earned 10 points.")
+                    st.balloons()
+                    st.session_state.level += 1
+                else:
+                    st.error("The output isn't quite right.")
+            else:
+                st.error("The DataFrame is not correctly displayed.")
+                
+        elif task_id == 3:
+            if "df" in safe_locals and hasattr(safe_locals["df"], 'dtypes'):
+                result = safe_locals["df"].dtypes
+                expected = pd.read_csv("https://raw.githubusercontent.com/mwaskom/seaborn-data/master/iris.csv").dtypes
+                if result.equals(expected):
+                    st.session_state.points += 10
+                    st.success("Great job! You've earned 10 points.")
+                    st.balloons()
+                    st.session_state.level += 1
+                else:
+                    st.error("The output isn't quite right.")
+            else:
+                st.error("The DataFrame dtypes are not correctly displayed.")
+                
+        elif task_id == 4:
+            if "df" in safe_locals and isinstance(safe_locals["df"], pd.DataFrame):
+                expected_columns = pd.read_csv("https://raw.githubusercontent.com/mwaskom/seaborn-data/master/iris.csv").columns
+                dropped_column = set(expected_columns) - set(safe_locals["df"].columns)
+                if len(dropped_column) == 1:
+                    st.session_state.points += 10
+                    st.success("Great job! You've earned 10 points.")
+                    st.balloons()
+                    st.session_state.level += 1
+                else:
+                    st.error("The column was not dropped correctly.")
+            else:
+                st.error("The DataFrame is not correctly modified.")
+                
+        elif task_id == 5:
+            if "df" in safe_locals and hasattr(safe_locals["df"], 'describe'):
+                result = safe_locals["df"].describe()
+                expected = pd.read_csv("https://raw.githubusercontent.com/mwaskom/seaborn-data/master/iris.csv").describe()
+                if result.equals(expected):
+                    st.session_state.points += 10
+                    st.success("Great job! You've earned 10 points.")
+                    st.balloons()
+                    st.session_state.level += 1
+                else:
+                    st.error("The summary statistics are not correct.")
+            else:
+                st.error("The DataFrame summary statistics are not correctly calculated.")
+                
+        elif task_id == 6:
+            if "df" in safe_locals and isinstance(safe_locals["df"], pd.DataFrame):
+                # Assuming some filtering condition, here we use "species == 'setosa'"
+                result = safe_locals["df"]
+                expected = pd.read_csv("https://raw.githubusercontent.com/mwaskom/seaborn-data/master/iris.csv")
+                expected = expected[expected["species"] == "setosa"]
+                if result.equals(expected):
+                    st.session_state.points += 10
+                    st.success("Great job! You've earned 10 points.")
+                    st.balloons()
+                    st.session_state.level += 1
+                else:
+                    st.error("The DataFrame filtering is not correct.")
+            else:
+                st.error("The DataFrame is not correctly filtered.")
+                
+        elif task_id == 7:
+            if "df" in safe_locals and isinstance(safe_locals["df"], pd.DataFrame):
+                result = safe_locals["df"]
+                expected = pd.read_csv("https://raw.githubusercontent.com/mwaskom/seaborn-data/master/iris.csv")
+                expected = expected.groupby("species").mean()
+                if result.equals(expected):
+                    st.session_state.points += 10
+                    st.success("Great job! You've earned 10 points.")
+                    st.balloons()
+                    st.session_state.level += 1
+                else:
+                    st.error("The DataFrame grouping and aggregation is not correct.")
+            else:
+                st.error("The DataFrame is not correctly grouped and aggregated.")
+                
+        elif task_id == 8:
+            if "df1" in safe_locals and "df2" in safe_locals:
+                result = safe_locals["df1"]
+                expected = pd.read_csv("https://raw.githubusercontent.com/mwaskom/seaborn-data/master/iris.csv")
+                merged_expected = expected.merge(expected, on="species")
+                if result.equals(merged_expected):
+                    st.session_state.points += 10
+                    st.success("Great job! You've earned 10 points.")
+                    st.balloons()
+                    st.session_state.level += 1
+                else:
+                    st.error("The DataFrame merging is not correct.")
+            else:
+                st.error("The DataFrames are not correctly merged.")
+                
+        elif task_id == 9:
+            if "df" in safe_locals and isinstance(safe_locals["df"], pd.DataFrame):
+                result = safe_locals["df"]
+                expected = pd.read_csv("https://raw.githubusercontent.com/mwaskom/seaborn-data/master/iris.csv")
+                pivot_expected = expected.pivot_table(index='species', values='sepal_length', aggfunc='mean')
+                if result.equals(pivot_expected):
+                    st.session_state.points += 10
+                    st.success("Great job! You've earned 10 points.")
+                    st.balloons()
+                    st.session_state.level += 1
+                else:
+                    st.error("The DataFrame pivot is not correct.")
+            else:
+                st.error("The DataFrame is not correctly pivoted.")
+                
+        elif task_id == 10:
+            if "df" in safe_locals and isinstance(safe_locals["df"], pd.DataFrame):
+                result = safe_locals["df"]
+                expected = pd.read_csv("https://raw.githubusercontent.com/mwaskom/seaborn-data/master/iris.csv")
+                if result.equals(expected):
+                    st.session_state.points += 10
+                    st.success("Great job! You've earned 10 points.")
+                    st.balloons()
+                    st.session_state.level += 1
+                else:
+                    st.error("The DataFrame saving is not correct.")
+            else:
+                st.error("The DataFrame is not correctly saved.")
+                
         else:
-            st.error("Try again, the output isn't quite right.")
-        return result
+            st.error("This task is not yet implemented for validation.")
+        return ""
     except Exception as e:
         st.error(f"An error occurred: {e}")
         return ""
@@ -91,6 +207,7 @@ if st.button("Run Code"):
         st.text(output)
     else:
         st.warning("Please enter some code to run.")
+
 # Hint System
 def get_advanced_hint(level, hint_number):
     # Dictionary of hints for each level
