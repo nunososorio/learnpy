@@ -181,5 +181,114 @@ def execute_user_code(code, task_id):
         else:
             st.error("This task is not yet implemented for validation.")
         return safe_locals
-    except Exception as e:
-        st.error(f
+    Apologies for the interruption. Here's the continuation of the code:
+
+st.error(f"An error occurred: {e}")
+        return ""
+
+# Initialize session state variables
+if 'level' not in st.session_state:
+    st.session_state.level = 1
+if 'points' not in st.session_state:
+    st.session_state.points = 0
+if 'hints_used' not in st.session_state:
+    st.session_state.hints_used = 0
+
+# Display instructions and the task for the current level
+show_instructions_and_task(st.session_state.level)
+
+# User code input area
+user_code = st.text_area("Your Code", height=200)
+
+# Run code button
+if st.button("Run Code"):
+    if user_code:
+        output = execute_user_code(user_code, st.session_state.level)
+        st.subheader("Output")
+        st.text(output)
+    else:
+        st.warning("Please enter some code to run.")
+
+# Hint System
+def get_advanced_hint(level, hint_number):
+    # Dictionary of hints for each level
+    hints = {
+        1: {
+            1: "Start by importing pandas as pd.",
+            2: "Use the pd.read_csv() function to read the CSV file.",
+            3: "Make sure to pass the correct URL of the CSV file to the function.",
+            4: "Solution: df = pd.read_csv('your_file.csv')"
+        },
+        2: {
+            1: "Use the DataFrame variable to call methods.",
+            2: "The .head() method displays the first few rows of the DataFrame.",
+            3: "You don't need to pass any arguments if you just want to see the first 5 rows.",
+            4: "Solution: df.head()"
+        },
+        3: {
+            1: "Each column in a DataFrame has a data type.",
+            2: "Use the .dtypes attribute to see the data types.",
+            3: "Remember, it's an attribute, not a method, so you don't need parentheses.",
+            4: "Solution: df.dtypes"
+        },
+        4: {
+            1: "To drop a column, you need to specify the column name.",
+            2: "The .drop() method requires the 'axis' parameter set to 1 for columns.",
+            3: "You can use inplace=True to modify the DataFrame in place.",
+            4: "Solution: df.drop('column_name', axis=1, inplace=True)"
+        },
+        5: {
+            1: "Summary statistics include count, mean, std, min, and more.",
+            2: "The .describe() method provides these statistics for numerical columns.",
+            3: "Just call the method on your DataFrame to see the statistics.",
+            4: "Solution: df.describe()"
+        },
+        6: {
+            1: "Boolean indexing allows you to filter rows based on a condition.",
+            2: "Create a condition that evaluates to True or False for each row.",
+            3: "Use this condition to index the DataFrame and select rows.",
+            4: "Solution: filtered_df = df[df['column'] > value]"
+        },
+        7: {
+            1: "Grouping data involves selecting a column to group by.",
+            2: "After grouping, you can apply an aggregate function like mean or sum.",
+            3: "Call .groupby() and then an aggregate function on the result.",
+            4: "Solution: df.groupby('column').mean()"
+        },
+        8: {
+            1: "Merging combines two DataFrames based on a common column.",
+            2: "Decide on the type of join you want: inner, outer, left, or right.",
+            3: "Use the .merge() method with the 'on' parameter specifying the common column.",
+            4: "Solution: merged_df = df1.merge(df2, on='common_column')"
+        },
+        9: {
+            1: "Pivoting restructures data based on column values.",
+            2: "Choose which column will be the new rows (index), columns, and values.",
+            3: "Use the .pivot_table() method with the appropriate parameters.",
+            4: "Solution: df.pivot_table(values='values_column', index='rows_column', columns='columns_column')"
+        },
+        10: {
+            1: "Saving to CSV is useful for data persistence.",
+            2: "The .to_csv() method allows you to specify a file name.",
+            3: "You can also choose whether to include the index with the 'index' parameter.",
+            4: "Solution: df.to_csv('new_file.csv', index=False)"
+        },
+        # Add more hints for each level
+    }
+    
+    # Retrieve the specific hint for the level and hint number
+    level_hints = hints.get(level, {})
+    return level_hints.get(hint_number, "No more hints available.")
+
+# Display hints based on user requests
+if st.sidebar.button("Get a Hint"):
+    if 'hint_number' not in st.session_state:
+        st.session_state.hint_number = 1
+    else:
+        st.session_state.hint_number += 1
+
+    hint = get_advanced_hint(st.session_state.level, st.session_state.hint_number)
+    st.sidebar.write(hint)
+
+    # Deduct points for using a hint, with increasing cost for additional hints
+    st.session_state.points -= st.session_state.hint_number
