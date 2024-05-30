@@ -27,8 +27,7 @@ def execute_user_code(code, task_id):
         exec(code, safe_globals, safe_locals)
         
         # Run the validation check for the current task
-        validation_check = validations.get_validation(code, task_id, pd)
-        message, success = validation_check(safe_locals)
+        message, success = validations.get_validation(code, task_id, pd)
         
         if success:
             st.session_state.points += 10
