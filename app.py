@@ -72,7 +72,7 @@ if st.button("Run Code"):
     if user_code:
         output = execute_user_code(user_code, st.session_state.level)
         st.subheader("Output")
-        st.text(output)
+        st.dataframe(output)
     else:
         st.warning("Please enter some code to run.")
 
