@@ -5,13 +5,15 @@ import tasks
 import validations
 import hints
 
-# Create a placeholder for the instructions
+# Create placeholders for the title, score, and instructions
+title_placeholder = st.empty()
+score_placeholder = st.empty()
 instructions_placeholder = st.empty()
 
 def show_instructions_and_task(level):
-    instructions_placeholder.markdown(
+    title_placeholder.title("Pandas Playground: Learn and Code!")
+    score_placeholder.info(
         f"""
-        # Pandas Playground: Learn and Code!
         Welcome to the Pandas Playground! Improve your pandas skills by completing tasks and earning points.
         Current Level: **{level}**
         Current Score: **{st.session_state.points}**
@@ -34,10 +36,13 @@ def execute_user_code(code, task_id):
         # Run the validation check for the current task
         message, success = validations.get_validation(code, task_id, pd)
         
-        if success:
+        if success and not st.session_state.get('validated', False):
             st.session_state.points += 10
             st.success(f"Great job! You've earned 10 points. {message}")
             st.balloons()
+            st.session_state.validated = True
+        elif success:
+            st.success(f"Great job! You've already completed this task. {message}")
         else:
             st.error(message)
             
@@ -53,6 +58,8 @@ if 'points' not in st.session_state:
     st.session_state.points = 0
 if 'hints_used' not in st.session_state:
     st.session_state.hints_used = 0
+if 'validated' not in st.session_state:
+    st.session_state.validated = False
 
 # Display instructions and the task for the current level
 show_instructions_and_task(st.session_state.level)
@@ -72,6 +79,8 @@ if st.button("Run Code"):
 # Progress to next task button
 if st.button("Next Task"):
     st.session_state.level += 1
+    st.session_state.validated = False
+    st.session_state.hint_number = 0
     show_instructions_and_task(st.session_state.level)
 
 # Display hints based on user requests
