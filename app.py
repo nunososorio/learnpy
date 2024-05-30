@@ -46,10 +46,11 @@ def execute_user_code(code, task_id):
         else:
             st.error(message)
             
-        return safe_locals
+        # Return the DataFrame instead of a string
+        return safe_locals.get('df', pd.DataFrame())
     except Exception as e:
         st.error(f"An error occurred: {e}")
-        return ""
+        return pd.DataFrame()
 
 # Initialize session state variables
 if 'level' not in st.session_state:
@@ -72,6 +73,7 @@ if st.button("Run Code"):
     if user_code:
         output = execute_user_code(user_code, st.session_state.level)
         st.subheader("Output")
+        # Use st.dataframe() to display the DataFrame with column names
         st.dataframe(output)
     else:
         st.warning("Please enter some code to run.")
