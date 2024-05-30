@@ -8,8 +8,10 @@ import hints
 def show_instructions_and_task(level):
     st.title("Pandas Playground: Learn and Code!")
     st.info(
-        """
+        f"""
         Welcome to the Pandas Playground! Improve your pandas skills by completing tasks and earning points.
+        Current Level: **{level}**
+        Current Score: **{st.session_state.points}**
         """
     )
     
@@ -33,7 +35,6 @@ def execute_user_code(code, task_id):
             st.session_state.points += 10
             st.success(f"Great job! You've earned 10 points. {message}")
             st.balloons()
-            st.session_state.level += 1
         else:
             st.error(message)
             
@@ -64,6 +65,11 @@ if st.button("Run Code"):
         st.text(output)
     else:
         st.warning("Please enter some code to run.")
+
+# Progress to next task button
+if st.button("Next Task"):
+    st.session_state.level += 1
+    show_instructions_and_task(st.session_state.level)
 
 # Display hints based on user requests
 if st.button("Get a Hint"):
