@@ -33,12 +33,9 @@ def execute_user_code(code, task_id):
         # Split the user's code into lines
         code_lines = code.split('\n')
         
-        # Execute all but the last line of the user's code
-        for line in code_lines[:-1]:
+        # Execute each line of the user's code
+        for line in code_lines:
             exec(line, safe_globals, safe_locals)
-        
-        # Evaluate the last line of the user's code and store the result
-        result = eval(code_lines[-1], safe_globals, safe_locals)
         
         # Run the validation check for the current task
         message, success = validations.get_validation(code, task_id, pd)
@@ -54,7 +51,8 @@ def execute_user_code(code, task_id):
             st.error(message)
             
         # Return the result of the last expression evaluated in the user's code
-        return result
+        # We assume that the user's code assigns the final result to a variable named "result"
+        return safe_locals.get("result", pd.DataFrame())
     except Exception as e:
         st.error(f"An error occurred: {e}")
         return pd.DataFrame()
@@ -68,6 +66,8 @@ if 'hints_used' not in st.session_state:
     st.session_state.hints_used = 0
 if 'validated' not in st.session_state:
     st.session_state.validated = False
+if 'hint_number' not in st.session_state:
+    st.session_state.hint_number = 0
 
 # Display instructions and the task for the current level
 show_instructions_and_task(st.session_state.level)
@@ -94,10 +94,7 @@ if st.button("Next Task"):
 
 # Display hints based on user requests
 if st.button("Get a Hint"):
-    if 'hint_number' not in st.session_state:
-        st.session_state.hint_number = 1
-    else:
-        st.session_state.hint_number += 1
+    st.session_state.hint_number += 1
 
     hint = hints.get_hint(st.session_state.level, st.session_state.hint_number)
     st.write(hint)
