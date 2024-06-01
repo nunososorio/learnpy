@@ -27,16 +27,12 @@ def show_instructions_and_task(level):
 def execute_user_code(code, task_id):
     try:
         # Safe environment setup
-        safe_globals = {"pd": pd}
+        safe_globals = {"pd": pd, "io": io}
         safe_locals = {}
-        
-        # Split the user's code into lines
-        code_lines = code.split('\n')
-        
-        # Execute each line of the user's code
-        for line in code_lines:
-            exec(line, safe_globals, safe_locals)
-        
+
+        # Execute the user's code
+        exec(code, safe_globals, safe_locals)
+
         # Run the validation check for the current task
         message, success = validations.get_validation(code, task_id, pd)
         
@@ -51,8 +47,11 @@ def execute_user_code(code, task_id):
             st.error(message)
             
         # Return the result of the last expression evaluated in the user's code
-        # We assume that the user's code assigns the final result to a variable named "result"
-        return safe_locals.get("result", pd.DataFrame())
+        # We assume that the user's code assigns the final result to a variable named "df"
+        return safe_locals.get("df", pd.DataFrame())
+    except SyntaxError as e:
+        st.error(f"Syntax error in your code: {e}")
+        return pd.DataFrame()
     except Exception as e:
         st.error(f"An error occurred: {e}")
         return pd.DataFrame()
